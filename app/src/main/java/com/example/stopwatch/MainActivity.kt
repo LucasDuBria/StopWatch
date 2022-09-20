@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
     var currentTime : Long = 0
     companion object{
         val TAG = "MainActivity"
+        val STATE_TIME = "display time"
     }
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -23,6 +24,13 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         Log.d(TAG, "onCreate: ")
         wireWidgets()
+        if(savedInstanceState != null){
+            currentTime = savedInstanceState.getLong(STATE_TIME)
+            chronometer.base = SystemClock.elapsedRealtime() - currentTime
+            if(isStart) {
+                chronometer.start()
+            }
+        }
         startButton.setOnClickListener {
             if(!isStart){
                 startChronometer()
@@ -49,13 +57,25 @@ class MainActivity : AppCompatActivity() {
                 currentTime = SystemClock.elapsedRealtime()
                 chronometer.setBase(currentTime)
                 if(!isStart) {
-                    startChronometer()
+                    startChronometer()  
                 }
                 startButton.setBackgroundColor(Color.rgb(0, 255, 0))
                 startButton.text = "Start"
+                chronometer.stop()
             }
         }
     }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        if(isStart) {
+            currentTime = SystemClock.elapsedRealtime() - chronometer.base
+        }
+        outState.putLong(STATE_TIME, currentTime)
+
+        super.onSaveInstanceState(outState)
+
+    }
+
     private fun startChronometer(){
         chronometer.start()
         startButton.text = "STOP"
